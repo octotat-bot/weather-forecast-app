@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Forecast App</title>
+    <link rel="stylesheet" href="new-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="app-header">
+            <h1 class="app-title">Weather Forecast</h1>
+            <div class="toggle-container">
+                <span>°C</span>
+                <label class="toggle">
+                    <input type="checkbox" id="unit-toggle">
+                    <span class="slider round"></span>
+                </label>
+                <span>°F</span>
+            </div>
+        </div>
+
+        <div class="search-box">
+            <input type="text" placeholder="Enter city name" class="search-input">
+            <button class="search-button">
+                <i class="fas fa-search"></i>
+            </button>
+            <button class="geo-button" title="Get current location">
+                <i class="fas fa-map-marker-alt"></i>
+            </button>
+        </div>
+        
+        <div class="weather-info">
+            <div class="weather-header">
+                <h2 class="city-name">--</h2>
+                <div class="date">--</div>
+            </div>
+            
+            <div class="weather-card">
+                <div class="weather-main">
+                    <div class="temperature">
+                        <span class="temp-value">--</span>
+                        <span class="temp-unit">°C</span>
+                    </div>
+                    <div class="weather-icon">
+                        <i class="fas fa-sun"></i>
+                    </div>
+                    <div class="weather-description">--</div>
+                    <div class="feels-like">Feels like: <span class="feels-like-value">--</span>°</div>
+                </div>
+                
+                <div class="weather-details">
+                    <div class="detail-item">
+                        <i class="fas fa-wind"></i>
+                        <span class="detail-label">Wind</span>
+                        <span class="wind-speed">-- km/h</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-tint"></i>
+                        <span class="detail-label">Humidity</span>
+                        <span class="humidity">--%</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-compress-arrows-alt"></i>
+                        <span class="detail-label">Pressure</span>
+                        <span class="pressure">-- hPa</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 5-Day Forecast -->
+            <div class="forecast-container">
+                <h3 class="forecast-title">5-Day Forecast</h3>
+                <div class="forecast-items" id="hourly-forecast">
+                    <!-- Forecast items will be added here by JavaScript -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="loading-animation" id="loading-animation">
+            <div class="spinner"></div>
+            <p>Fetching weather data...</p>
+        </div>
+    </div>
+    
+    <footer class="footer">
+        <p>Data provided by <a href="https://openweathermap.org/" target="_blank">OpenWeather</a></p>
+    </footer>
+    
+    <script src="script.js"></script>
+</body>
+</html> 
