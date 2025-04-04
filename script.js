@@ -21,10 +21,73 @@ const geoButton = document.querySelector('.geo-button');
 const unitToggle = document.getElementById('unit-toggle');
 const loadingAnimation = document.getElementById('loading-animation');
 const hourlyForecast = document.getElementById('hourly-forecast');
+const weatherParticles = document.getElementById('weather-particles');
+const weatherBadge = document.getElementById('weather-badge');
 
 // State variables
 let currentWeatherData = null;
 let currentUnit = 'metric';
+let particlesAnimation = null;
+
+// Weather conditions for particle effects
+const weatherConditions = {
+    'clear': {
+        particleType: 'sun',
+        particleCount: 30,
+        bgGradient: 'linear-gradient(135deg, #1e90ff, #00bfff)',
+        particleColor: 'rgba(255, 255, 0, 0.8)',
+        badge: 'Clear Sky'
+    },
+    'clouds': {
+        particleType: 'cloud',
+        particleCount: 15,
+        bgGradient: 'linear-gradient(135deg, #636FA4, #E8CBC0)',
+        particleColor: 'rgba(255, 255, 255, 0.7)',
+        badge: 'Cloudy'
+    },
+    'rain': {
+        particleType: 'raindrop',
+        particleCount: 60,
+        bgGradient: 'linear-gradient(135deg, #3f4c6b, #606c88)',
+        particleColor: 'rgba(173, 216, 230, 0.8)',
+        badge: 'Rainy'
+    },
+    'snow': {
+        particleType: 'snowflake',
+        particleCount: 40,
+        bgGradient: 'linear-gradient(135deg, #83a4d4, #b6fbff)',
+        particleColor: 'rgba(255, 255, 255, 0.9)',
+        badge: 'Snowing'
+    },
+    'thunderstorm': {
+        particleType: 'lightning',
+        particleCount: 10,
+        bgGradient: 'linear-gradient(135deg, #232526, #414345)',
+        particleColor: 'rgba(255, 255, 0, 0.8)',
+        badge: 'Thunderstorm'
+    },
+    'drizzle': {
+        particleType: 'drizzle',
+        particleCount: 45,
+        bgGradient: 'linear-gradient(135deg, #5C6BC0, #7986CB)',
+        particleColor: 'rgba(173, 216, 230, 0.6)',
+        badge: 'Drizzle'
+    },
+    'mist': {
+        particleType: 'mist',
+        particleCount: 70,
+        bgGradient: 'linear-gradient(135deg, #808080, #A9A9A9)',
+        particleColor: 'rgba(220, 220, 220, 0.5)',
+        badge: 'Misty'
+    },
+    'default': {
+        particleType: 'default',
+        particleCount: 30,
+        bgGradient: 'linear-gradient(135deg, #1e3c72, #2a5298)',
+        particleColor: 'rgba(255, 255, 255, 0.5)',
+        badge: 'Weather'
+    }
+};
 
 // Weather icon mapping to Font Awesome icons
 const iconMapping = {
@@ -136,6 +199,85 @@ function formatTemp(temp) {
     return Math.round(temp);
 }
 
+// Create weather particles
+function createWeatherParticles(type, count, color) {
+    clearWeatherParticles();
+    
+    const particles = document.createDocumentFragment();
+    
+    for (let i = 0; i < count; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        
+        // Different particles sizes
+        const size = Math.random() * 10 + 5;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        
+        // Random positions
+        const posX = Math.random() * 100;
+        const posY = Math.random() * 100;
+        particle.style.left = `${posX}%`;
+        particle.style.top = `${posY}%`;
+        
+        // Different fall speeds
+        const animationDuration = Math.random() * 15 + 5;
+        particle.style.animationDuration = `${animationDuration}s`;
+        
+        // Delay animation start
+        const animationDelay = Math.random() * 5;
+        particle.style.animationDelay = `${animationDelay}s`;
+        
+        // Apply color
+        particle.style.background = color;
+        
+        // Different shapes based on weather type
+        if (type === 'raindrop' || type === 'drizzle') {
+            particle.style.borderRadius = '0 50% 50% 50%';
+            particle.style.transform = 'rotate(45deg)';
+            particle.style.opacity = '0.7';
+        } else if (type === 'snowflake') {
+            particle.style.borderRadius = '50%';
+            particle.style.boxShadow = '0 0 5px white';
+        } else if (type === 'lightning') {
+            particle.style.borderRadius = '0';
+            particle.style.width = '3px';
+            particle.style.height = '15px';
+            particle.style.opacity = '0';
+            
+            // Flash animation
+            setInterval(() => {
+                if (Math.random() > 0.95) {
+                    particle.style.opacity = '1';
+                    setTimeout(() => {
+                        particle.style.opacity = '0';
+                    }, 100);
+                }
+            }, 1000);
+        } else if (type === 'mist') {
+            particle.style.borderRadius = '50%';
+            particle.style.filter = 'blur(5px)';
+        }
+        
+        particles.appendChild(particle);
+    }
+    
+    weatherParticles.appendChild(particles);
+}
+
+// Clear weather particles
+function clearWeatherParticles() {
+    while (weatherParticles.firstChild) {
+        weatherParticles.removeChild(weatherParticles.firstChild);
+    }
+}
+
+// Set background gradient based on weather
+function setBackgroundGradient(gradient) {
+    document.body.style.background = gradient;
+    document.body.style.backgroundAttachment = 'fixed';
+}
+
 // Reset weather display
 function resetWeatherDisplay() {
     cityName.textContent = '--';
@@ -147,6 +289,27 @@ function resetWeatherDisplay() {
     pressure.textContent = '-- hPa';
     weatherIcon.innerHTML = '<i class="fas fa-sun"></i>';
     hourlyForecast.innerHTML = '';
+    weatherBadge.textContent = '';
+    
+    // Set default background and particles
+    setBackgroundGradient(weatherConditions.default.bgGradient);
+    createWeatherParticles(
+        weatherConditions.default.particleType,
+        weatherConditions.default.particleCount,
+        weatherConditions.default.particleColor
+    );
+}
+
+// Get weather condition type
+function getWeatherConditionType(weatherId) {
+    if (weatherId >= 200 && weatherId < 300) return 'thunderstorm';
+    if (weatherId >= 300 && weatherId < 400) return 'drizzle';
+    if (weatherId >= 500 && weatherId < 600) return 'rain';
+    if (weatherId >= 600 && weatherId < 700) return 'snow';
+    if (weatherId >= 700 && weatherId < 800) return 'mist';
+    if (weatherId === 800) return 'clear';
+    if (weatherId > 800) return 'clouds';
+    return 'default';
 }
 
 // Update weather UI with API data
@@ -200,7 +363,34 @@ function updateWeatherUI(data) {
         weatherIcon.innerHTML = `<img src="${ICON_URL}${iconCode}@2x.png" alt="${data.weather[0].description}">`;
     }
     
-    // Update date and time
+    // Set weather effects based on condition
+    if (data.weather && data.weather[0] && data.weather[0].id) {
+        const conditionType = getWeatherConditionType(data.weather[0].id);
+        const condition = weatherConditions[conditionType] || weatherConditions.default;
+        
+        // Set background gradient
+        setBackgroundGradient(condition.bgGradient);
+        
+        // Create particles
+        createWeatherParticles(
+            condition.particleType,
+            condition.particleCount,
+            condition.particleColor
+        );
+        
+        // Set weather badge
+        weatherBadge.textContent = condition.badge;
+        
+        // Special effects for daytime/nighttime
+        const isNight = data.weather[0].icon.includes('n');
+        if (isNight) {
+            document.body.style.background = 'linear-gradient(135deg, #0f2027, #203a43, #2c5364)';
+            document.documentElement.style.setProperty('--card-bg', 'rgba(20, 20, 40, 0.7)');
+        } else {
+            document.documentElement.style.setProperty('--card-bg', 'rgba(40, 40, 40, 0.7)');
+        }
+    }
+    
     updateDateTime();
     
     // If we have coordinates, fetch forecast
@@ -404,46 +594,36 @@ function toggleTemperatureUnit() {
     }
 }
 
-// Event listeners
-document.addEventListener('DOMContentLoaded', function() {
-    // Set up search button event listener
-    if (searchButton) {
-        searchButton.addEventListener('click', function() {
+// Initialize the app
+function initApp() {
+    // Initialize with default view
+    resetWeatherDisplay();
+    updateDateTime();
+    
+    // Set up event listeners
+    searchButton.addEventListener('click', () => {
+        const city = searchInput.value.trim();
+        if (city) {
+            fetchWeather(city);
+        }
+    });
+    
+    searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
             const city = searchInput.value.trim();
             if (city) {
                 fetchWeather(city);
             }
-        });
-    }
+        }
+    });
     
-    // Set up search input event listener
-    if (searchInput) {
-        searchInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                const city = searchInput.value.trim();
-                if (city) {
-                    fetchWeather(city);
-                }
-            }
-        });
-    }
+    geoButton.addEventListener('click', getCurrentLocation);
     
-    // Set up geolocation button event listener
-    if (geoButton) {
-        geoButton.addEventListener('click', getCurrentLocation);
-    }
+    unitToggle.addEventListener('change', toggleTemperatureUnit);
     
-    // Set up temperature unit toggle
-    if (unitToggle) {
-        unitToggle.addEventListener('change', toggleTemperatureUnit);
-    }
-    
-    // Update date and time
-    updateDateTime();
-    
-    // Set up timer to update date/time every minute
+    // Update date and time every minute
     setInterval(updateDateTime, 60000);
-    
-    // Try to use user's current location on load
-    getCurrentLocation();
-}); 
+}
+
+// Call the init function when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', initApp); 
